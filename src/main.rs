@@ -5,23 +5,12 @@ extern crate libc;
 
 #[allow(non_camel_case_types)]
 mod ffi {
-  use libc::{c_int, c_uint, c_long, c_void};
+  use libc::{c_uint, uintptr_t};
+  use libc::types::os::arch::extra::{BOOL, HANDLE, LONG_PTR, LPVOID};
 
-  type BOOL = c_int;
   type UINT = c_uint;
-  type PVOID = *mut c_void;
-
-  #[cfg(target_arch = "x86")]
-  type LONG_PTR = c_long;
-  #[cfg(target_arch = "x86_64")]
-  type LONG_PTR = i64;
-
-  #[cfg(target_arch = "x86")]
-  type UINT_PTR = c_uint;
-  #[cfg(target_arch = "x86_64")]
-  type UINT_PTR = u64;
-
-  type HANDLE = PVOID;
+  type PVOID = LPVOID;
+  type UINT_PTR = uintptr_t;
   type HWND = HANDLE;
   type WPARAM = UINT_PTR;
   type LPARAM = LONG_PTR;
