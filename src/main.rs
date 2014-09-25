@@ -1,7 +1,12 @@
 #![no_std]
 #![feature(lang_items)]
+#![feature(link_args)]
 
 extern crate libc;
+
+// Link as "Windows application" to avoid console window flash
+#[link_args = "-Wl,--subsystem,windows"]
+extern {}
 
 #[allow(non_camel_case_types)]
 mod ffi {
