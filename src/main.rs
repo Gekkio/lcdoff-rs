@@ -11,10 +11,9 @@ extern {}
 #[allow(non_camel_case_types)]
 mod ffi {
   use libc::{c_uint, uintptr_t};
-  use libc::types::os::arch::extra::{BOOL, HANDLE, LONG_PTR, LPVOID};
+  use libc::types::os::arch::extra::{BOOL, HANDLE, LONG_PTR};
 
   type UINT = c_uint;
-  type PVOID = LPVOID;
   type UINT_PTR = uintptr_t;
   type HWND = HANDLE;
   type WPARAM = UINT_PTR;
