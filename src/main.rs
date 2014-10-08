@@ -24,7 +24,7 @@ mod ffi {
   pub static SC_MONITORPOWER: WPARAM = 0xf170;
 
   #[link(name = "user32")]
-  extern "system" {
+  extern "stdcall" {
     pub fn SendNotifyMessageW(hwnd: HWND, msg: UINT, wParam: WPARAM, lParam: LPARAM) -> BOOL;
   }
 }
