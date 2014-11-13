@@ -2,6 +2,7 @@
 #![no_main]
 #![feature(lang_items)]
 #![feature(link_args)]
+#![feature(macro_rules)]
 
 extern crate libc;
 
@@ -109,17 +110,17 @@ fn lcd_off(hwnd: ffi::HWND) {
   }
 }
 
+macro_rules! bytes_16( ($($e:expr),*) => ({ [$($e as u16),*] }) )
+
+const CLASS_NAME: [u16, ..10] =
+  bytes_16!('l', 'c', 'd', 'o', 'f', 'f', '-', 'r', 's', '\0');
+
 #[allow(non_snake_case)]
 #[no_mangle]
 pub extern "stdcall" fn WinMain(
     hInstance: ffi::HINSTANCE, _: ffi::HINSTANCE,
     _: ffi::LPSTR, _: c_int) -> c_int {
 
-  let className = [
-    'l' as u16, 'c' as u16, 'd' as u16,
-    'o' as u16, 'f' as u16, 'f' as u16,
-    '-' as u16, 'r' as u16, 's' as u16, 0 as u16
-  ];
   let class = ffi::WNDCLASS {
     style: 0,
     lpfnWndProc: ffi::default_window_proc,
@@ -130,7 +131,7 @@ pub extern "stdcall" fn WinMain(
     hCursor: null_mut(),
     hbrBackground: null_mut(),
     lpszMenuName: null(),
-    lpszClassName: &className[0]
+    lpszClassName: &CLASS_NAME[0]
   };
   let atom = unsafe { ffi::RegisterClassW(&class) };
   let window = unsafe { ffi::CreateWindowExW(
