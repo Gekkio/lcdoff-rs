@@ -155,4 +155,4 @@ pub extern "stdcall" fn WinMain(
 // Boilerplate needed to avoid dependency on std
 #[lang = "stack_exhausted"] extern fn stack_exhausted() {}
 #[lang = "eh_personality"] extern fn eh_personality() {}
-#[lang = "fail_fmt"] extern fn fail_fmt() {}
+#[lang = "panic_fmt"] extern fn panic_fmt() {}
