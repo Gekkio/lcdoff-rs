@@ -2,8 +2,8 @@
 #![no_main]
 #![feature(lang_items)]
 #![feature(link_args)]
-#![feature(macro_rules)]
 
+#[allow(unstable)]
 extern crate libc;
 
 use libc::{c_int};
@@ -36,7 +36,7 @@ mod ffi {
   pub type WPARAM = UINT_PTR;
   pub type WNDPROC = extern "stdcall" fn(HWND, UINT, WPARAM, LPARAM) -> LRESULT;
 
-  pub const CW_USEDEFAULT: c_int = 0x80000000u as c_int;
+  pub const CW_USEDEFAULT: c_int = 0x80000000us as c_int;
   pub const WM_SYSCOMMAND: UINT = 0x0112;
   pub const SC_MONITORPOWER: WPARAM = 0xf170;
 
@@ -110,9 +110,9 @@ fn lcd_off(hwnd: ffi::HWND) {
   }
 }
 
-macro_rules! bytes_16( ($($e:expr),*) => ({ [$($e as u16),*] }) )
+macro_rules! bytes_16( ($($e:expr),*) => ({ [$($e as u16),*] }) );
 
-const CLASS_NAME: [u16, ..10] =
+const CLASS_NAME: [u16; 10] =
   bytes_16!('l', 'c', 'd', 'o', 'f', 'f', '-', 'r', 's', '\0');
 
 #[allow(non_snake_case)]
