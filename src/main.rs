@@ -1,9 +1,10 @@
+#![feature(no_std)]
+
 #![no_std]
 #![no_main]
 #![feature(lang_items)]
 #![feature(link_args)]
 
-#[allow(unstable)]
 extern crate libc;
 
 use libc::{c_int};
@@ -36,7 +37,7 @@ mod ffi {
   pub type WPARAM = UINT_PTR;
   pub type WNDPROC = extern "stdcall" fn(HWND, UINT, WPARAM, LPARAM) -> LRESULT;
 
-  pub const CW_USEDEFAULT: c_int = 0x80000000us as c_int;
+  pub const CW_USEDEFAULT: c_int = 0x80000000usize as c_int;
   pub const WM_SYSCOMMAND: UINT = 0x0112;
   pub const SC_MONITORPOWER: WPARAM = 0xf170;
 
@@ -152,8 +153,3 @@ pub extern "stdcall" fn WinMain(
   lcd_off(window);
   0
 }
-
-// Boilerplate needed to avoid dependency on std
-#[lang = "stack_exhausted"] extern fn stack_exhausted() {}
-#[lang = "eh_personality"] extern fn eh_personality() {}
-#[lang = "panic_fmt"] extern fn panic_fmt() {}
