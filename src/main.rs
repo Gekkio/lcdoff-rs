@@ -1,130 +1,45 @@
-#![feature(no_std)]
-
-#![no_std]
 #![no_main]
-#![feature(lang_items)]
+#![feature(core)]
 #![feature(link_args)]
 
-extern crate libc;
+extern crate core;
+extern crate user32;
+extern crate winapi;
 
-use libc::{c_int};
+use core::option::Option::Some;
+use std::ptr::{null, null_mut};
+use user32::{CreateWindowExW, DefWindowProcW, RegisterClassW, SendNotifyMessageW};
+use winapi::{c_int,
+  CW_USEDEFAULT, HINSTANCE, HWND, LPSTR, LPCWSTR, WNDCLASSW, WM_SYSCOMMAND, WPARAM
+};
 
 // Link as "Windows application" to avoid console window flash
 #[link_args = "-Wl,--subsystem,windows"]
 extern {}
 
-#[allow(non_camel_case_types)]
-#[allow(non_snake_case)]
-mod ffi {
-  use libc::{
-    c_int, c_uint, uintptr_t
-  };
-  pub use libc::types::os::arch::extra::{
-    BOOL, DWORD, HANDLE, LONG_PTR, LPCWSTR, LPSTR, LPVOID, LRESULT, WORD
-  };
+const SC_MONITORPOWER: WPARAM = 0xf170;
 
-  pub type ATOM = WORD;
-  pub type HBRUSH = HANDLE;
-  pub type HCURSOR = HICON;
-  pub type HICON = HANDLE;
-  pub type HINSTANCE = HANDLE;
-  pub type HMENU = HANDLE;
-  pub type HWND = HANDLE;
-  pub type LPARAM = LONG_PTR;
-  pub type LPCTSTR = LPCWSTR;
-  pub type UINT = c_uint;
-  pub type UINT_PTR = uintptr_t;
-  pub type WPARAM = UINT_PTR;
-  pub type WNDPROC = extern "stdcall" fn(HWND, UINT, WPARAM, LPARAM) -> LRESULT;
-
-  pub const CW_USEDEFAULT: c_int = 0x80000000usize as c_int;
-  pub const WM_SYSCOMMAND: UINT = 0x0112;
-  pub const SC_MONITORPOWER: WPARAM = 0xf170;
-
-  #[repr(C)]
-  pub struct WNDCLASS {
-    pub style: UINT,
-    pub lpfnWndProc: WNDPROC,
-    pub cbClsExtra: c_int,
-    pub cbWndExtra: c_int,
-    pub hInstance: HINSTANCE,
-    pub hIcon: HICON,
-    pub hCursor: HCURSOR,
-    pub hbrBackground: HBRUSH,
-    pub lpszMenuName: LPCTSTR,
-    pub lpszClassName: LPCTSTR
-  }
-
-  #[link(name = "user32")]
-  extern "stdcall" {
-    pub fn DefWindowProcW(
-      hwnd: HWND,
-      msg: UINT,
-      wParam: WPARAM,
-      lParam: LPARAM) -> LRESULT;
-
-    pub fn SendNotifyMessageW(
-      hwnd: HWND,
-      msg: UINT,
-      wParam: WPARAM,
-      lParam: LPARAM) -> BOOL;
-
-    pub fn RegisterClassW(
-      lpWndClass: *const WNDCLASS) -> ATOM;
-
-    pub fn CreateWindowExW(
-      dwExStyle: DWORD,
-      lpClassName: LPCTSTR,
-      lpWindowName: LPCTSTR,
-      dwStyle: DWORD,
-      x: c_int,
-      y: c_int,
-      nWidth: c_int,
-      nHeight: c_int,
-      hWndParent: HWND,
-      hMenu: HMENU,
-      hInstance: HINSTANCE,
-      lpParam: LPVOID) -> HWND;
-  }
-
-  pub extern "stdcall" fn default_window_proc(
-      hwnd: HWND, msg: UINT, wParam: WPARAM, lParam: LPARAM)
-      -> LRESULT {
-    unsafe {
-      DefWindowProcW(hwnd, msg, wParam, lParam)
-    }
-  }
-}
-
-fn null<T>() -> *const T {
-  0 as *const T
-}
-
-fn null_mut<T>() -> *mut T {
-  0 as *mut T
-}
-
-fn lcd_off(hwnd: ffi::HWND) {
+fn lcd_off(hwnd: HWND) {
   unsafe {
     // 2 (the display is being shut off)
-    ffi::SendNotifyMessageW(hwnd, ffi::WM_SYSCOMMAND, ffi::SC_MONITORPOWER, 2);
+    SendNotifyMessageW(hwnd, WM_SYSCOMMAND, SC_MONITORPOWER, 2);
   }
 }
 
 macro_rules! bytes_16( ($($e:expr),*) => ({ [$($e as u16),*] }) );
 
-const CLASS_NAME: [u16; 10] =
+static CLASS_NAME: [u16; 10] =
   bytes_16!('l', 'c', 'd', 'o', 'f', 'f', '-', 'r', 's', '\0');
 
 #[allow(non_snake_case)]
 #[no_mangle]
-pub extern "stdcall" fn WinMain(
-    hInstance: ffi::HINSTANCE, _: ffi::HINSTANCE,
-    _: ffi::LPSTR, _: c_int) -> c_int {
+pub extern "system" fn WinMain(
+    hInstance: HINSTANCE, _: HINSTANCE,
+    _: LPSTR, _: c_int) -> c_int {
 
-  let class = ffi::WNDCLASS {
+  let class = WNDCLASSW {
     style: 0,
-    lpfnWndProc: ffi::default_window_proc,
+    lpfnWndProc: Some(DefWindowProcW),
     cbClsExtra: 0,
     cbWndExtra: 0,
     hInstance: hInstance,
@@ -134,16 +49,16 @@ pub extern "stdcall" fn WinMain(
     lpszMenuName: null(),
     lpszClassName: &CLASS_NAME[0]
   };
-  let atom = unsafe { ffi::RegisterClassW(&class) };
-  let window = unsafe { ffi::CreateWindowExW(
+  let atom = unsafe { RegisterClassW(&class) };
+  let window = unsafe { CreateWindowExW(
     0,
-    atom as ffi::LPCTSTR,
+    atom as LPCWSTR,
     null(),
     0,
-    ffi::CW_USEDEFAULT,
-    ffi::CW_USEDEFAULT,
-    ffi::CW_USEDEFAULT,
-    ffi::CW_USEDEFAULT,
+    CW_USEDEFAULT,
+    CW_USEDEFAULT,
+    CW_USEDEFAULT,
+    CW_USEDEFAULT,
     null_mut(),
     null_mut(),
     hInstance,
