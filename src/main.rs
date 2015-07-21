@@ -1,12 +1,9 @@
 #![no_main]
-#![feature(core)]
 #![feature(link_args)]
 
-extern crate core;
 extern crate user32;
 extern crate winapi;
 
-use core::option::Option::Some;
 use std::ptr::{null, null_mut};
 use user32::{CreateWindowExW, DefWindowProcW, RegisterClassW, SendNotifyMessageW};
 use winapi::{c_int,
